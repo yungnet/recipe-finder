@@ -542,6 +542,40 @@
   /* === CONTENT SECTIONS === */
   .section { display: none; }
   .section.active { display: block; }
+
+  /* === RECIPE IMAGE === */
+  .recipe-img {
+    width: 68px; height: 68px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+  .recipe-img-placeholder {
+    width: 68px; height: 68px;
+    border-radius: 12px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  /* === API KEY INPUT === */
+  .api-key-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    margin-bottom: 4px;
+  }
+  .api-key-input:focus { border-color: var(--orange); }
+  .api-key-hint { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  .api-key-hint a { color: var(--orange); }
 </style>
 </head>
 <body>
@@ -631,6 +665,10 @@
       </div>
     </div>
 
+    <div class="allergy-group-label">Spoonacular API Key</div>
+    <input class="api-key-input" id="apiKeyInput" type="text" placeholder="Paste your free API key here" autocomplete="off" />
+    <p class="api-key-hint">Get a free key (150 searches/day) at <a href="https://spoonacular.com/food-api" target="_blank">spoonacular.com/food-api</a></p>
+
     <div class="allergy-group-label">Common Allergens (Big 9)</div>
     <div class="allergy-grid" id="allergyGrid"></div>
 
@@ -643,15 +681,15 @@
 
 <script>
 const ALLERGENS = [
-  { id: 'peanuts',     emoji: '🥜', name: 'Peanuts' },
-  { id: 'treenuts',   emoji: '🌰', name: 'Tree Nuts' },
-  { id: 'milk',       emoji: '🥛', name: 'Milk/Dairy' },
-  { id: 'eggs',       emoji: '🥚', name: 'Eggs' },
-  { id: 'wheat',      emoji: '🌾', name: 'Wheat/Gluten' },
-  { id: 'soy',        emoji: '🫘', name: 'Soy' },
-  { id: 'fish',       emoji: '🐟', name: 'Fish' },
-  { id: 'shellfish',  emoji: '🦐', name: 'Shellfish' },
-  { id: 'sesame',     emoji: '🌻', name: 'Sesame' },
+  { id: 'peanuts',    emoji: '🥜', name: 'Peanuts' },
+  { id: 'treenuts',  emoji: '🌰', name: 'Tree Nuts' },
+  { id: 'milk',      emoji: '🥛', name: 'Milk/Dairy' },
+  { id: 'eggs',      emoji: '🥚', name: 'Eggs' },
+  { id: 'wheat',     emoji: '🌾', name: 'Wheat/Gluten' },
+  { id: 'soy',       emoji: '🫘', name: 'Soy' },
+  { id: 'fish',      emoji: '🐟', name: 'Fish' },
+  { id: 'shellfish', emoji: '🦐', name: 'Shellfish' },
+  { id: 'sesame',    emoji: '🌻', name: 'Sesame' },
 ];
 const PREFS = [
   { id: 'vegan',      emoji: '🥦', name: 'Vegan' },
@@ -660,10 +698,22 @@ const PREFS = [
   { id: 'lowsodium',  emoji: '🧂', name: 'Low Sodium' },
 ];
 
+const INTOLERANCE_MAP = {
+  peanuts: 'peanut', treenuts: 'tree nut', milk: 'dairy',
+  eggs: 'egg', wheat: 'gluten', soy: 'soy',
+  fish: 'seafood', shellfish: 'shellfish', sesame: 'sesame',
+};
+const DIET_MAP = { vegan: 'vegan', vegetarian: 'vegetarian' };
+const MEAL_TYPE_MAP = {
+  breakfast: 'breakfast', lunch: 'main course',
+  dinner: 'main course', snack: 'snack', dessert: 'dessert',
+};
+
 let STATE = {
   selectedAllergies: JSON.parse(localStorage.getItem('kc_allergies') || '[]'),
   severity: localStorage.getItem('kc_severity') || 'strict',
   savedRecipes: JSON.parse(localStorage.getItem('kc_saved') || '[]'),
+  apiKey: localStorage.getItem('kc_spoon_key') || '',
   currentResults: [],
   activeFilter: 'all',
   activeTab: 'search',
@@ -675,10 +725,12 @@ function init() {
   renderAllergySummary();
   renderSaved();
   updateSavedCount();
-
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
+  if (!STATE.apiKey) {
+    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">🔑</div><p>Tap <strong>Allergies</strong> above to add your free Spoonacular API key and set allergy preferences.</p></div>`;
+  }
 }
 
 // ===== TABS =====
@@ -696,6 +748,8 @@ function showTab(tab) {
 
 // ===== ALLERGY PANEL =====
 function renderAllergyPanel() {
+  document.getElementById('apiKeyInput').value = STATE.apiKey || '';
+
   const grid = document.getElementById('allergyGrid');
   grid.innerHTML = ALLERGENS.map(a => `
     <div class="allergy-toggle ${STATE.selectedAllergies.includes(a.id) ? 'selected' : ''}" id="at-${a.id}" onclick="toggleAllergy('${a.id}')">
@@ -721,8 +775,7 @@ function toggleAllergy(id) {
   const idx = STATE.selectedAllergies.indexOf(id);
   if (idx >= 0) STATE.selectedAllergies.splice(idx, 1);
   else STATE.selectedAllergies.push(id);
-  const el = document.getElementById('at-' + id);
-  el.classList.toggle('selected');
+  document.getElementById('at-' + id).classList.toggle('selected');
 }
 
 function setSeverity(val, save = true) {
@@ -734,7 +787,15 @@ function setSeverity(val, save = true) {
 function saveAllergies() {
   localStorage.setItem('kc_allergies', JSON.stringify(STATE.selectedAllergies));
   localStorage.setItem('kc_severity', STATE.severity);
+  const keyVal = document.getElementById('apiKeyInput').value.trim();
+  if (keyVal) {
+    STATE.apiKey = keyVal;
+    localStorage.setItem('kc_spoon_key', keyVal);
+  }
   renderAllergySummary();
+  if (STATE.apiKey) {
+    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">🥕</div><p>Search above to find allergy-safe recipes for your kids.</p></div>`;
+  }
   closePanel();
 }
 
@@ -773,63 +834,38 @@ async function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
   if (!q) return;
 
+  if (!STATE.apiKey) {
+    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">🔑</div><p>Tap <strong>Allergies</strong> above to add your free Spoonacular API key first.</p></div>`;
+    return;
+  }
+
   const btn = document.getElementById('searchBtn');
   btn.disabled = true;
   btn.textContent = '...';
-
-  document.getElementById('searchStatus').innerHTML = `<div class="spinner"></div><div class="status-msg"><p>Searching for allergy-safe recipes...</p></div>`;
+  document.getElementById('searchStatus').innerHTML = `<div class="spinner"></div><div class="status-msg"><p>Finding allergy-safe recipes...</p></div>`;
   document.getElementById('recipeList').innerHTML = '';
 
-  const allergyContext = STATE.selectedAllergies.length > 0
-    ? `The user wants to avoid these allergens: ${STATE.selectedAllergies.join(', ')}. For each recipe, explicitly state whether it contains, may contain, or is free from each of these allergens.`
-    : 'No allergens specified.';
+  const intolerances = STATE.selectedAllergies.filter(a => INTOLERANCE_MAP[a]).map(a => INTOLERANCE_MAP[a]);
+  const diets = STATE.selectedAllergies.filter(a => DIET_MAP[a]).map(a => DIET_MAP[a]);
 
-  const mealFilter = STATE.activeFilter !== 'all' ? ` as a ${STATE.activeFilter}` : '';
-  const prompt = `Find 6 child-friendly recipes for "${q}"${mealFilter}.
-
-${allergyContext}
-
-Return a JSON array (no markdown, no extra text) with exactly this shape:
-[
-  {
-    "title": "Recipe Name",
-    "emoji": "🍕",
-    "description": "2-sentence kid-friendly description",
-    "time": "25 mins",
-    "servings": "4",
-    "difficulty": "Easy",
-    "meal_type": "dinner",
-    "url": "https://www.example.com/recipe",
-    "source": "Source website name",
-    "allergen_status": {
-      "contains": ["milk","eggs"],
-      "may_contain": ["wheat"],
-      "free_from": ["peanuts","soy","fish","shellfish","sesame","treenuts"]
-    }
-  }
-]
-
-Use real recipe websites like BBC Good Food, Allrecipes, Food Network, Serious Eats, or similar. Make the URLs plausible and real-looking. Only return valid JSON.`;
+  const params = new URLSearchParams({
+    apiKey: STATE.apiKey,
+    query: q,
+    number: 6,
+    addRecipeInformation: true,
+  });
+  if (intolerances.length) params.set('intolerances', intolerances.join(','));
+  if (diets.length) params.set('diet', diets.join(','));
+  if (STATE.activeFilter !== 'all') params.set('type', MEAL_TYPE_MAP[STATE.activeFilter] || STATE.activeFilter);
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
+    const res = await fetch(`https://api.spoonacular.com/recipes/complexSearch?${params}`);
+    if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    const raw = data.content.map(c => c.text || '').join('');
-    const cleaned = raw.replace(/```json|```/g, '').trim();
-    const recipes = JSON.parse(cleaned);
-    STATE.currentResults = recipes;
-    renderResults(recipes);
+    STATE.currentResults = data.results || [];
+    renderResults(STATE.currentResults);
   } catch (err) {
-    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">😕</div><p>Something went wrong searching. Please try again.</p></div>`;
+    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">😕</div><p>Something went wrong. Check your API key and try again.</p></div>`;
     document.getElementById('recipeList').innerHTML = '';
   }
 
@@ -837,60 +873,56 @@ Use real recipe websites like BBC Good Food, Allrecipes, Food Network, Serious E
   btn.textContent = 'Find';
 }
 
+// ===== RENDER RESULTS =====
 function renderResults(recipes) {
   const list = document.getElementById('recipeList');
   const status = document.getElementById('searchStatus');
 
   let filtered = recipes;
   if (STATE.activeFilter !== 'all') {
-    filtered = recipes.filter(r => (r.meal_type || '').toLowerCase() === STATE.activeFilter);
+    const key = STATE.activeFilter;
+    filtered = recipes.filter(r => {
+      const types = (r.dishTypes || []).map(t => t.toLowerCase());
+      if (key === 'lunch' || key === 'dinner') return types.some(t => ['lunch','dinner','main course','main dish'].includes(t));
+      return types.includes(key);
+    });
+    if (!filtered.length) filtered = recipes;
   }
 
-  if (filtered.length === 0) {
-    status.innerHTML = `<div class="status-msg"><div class="big">🤔</div><p>No ${STATE.activeFilter} recipes found. Try a different filter or search term.</p></div>`;
+  if (!filtered.length) {
+    status.innerHTML = `<div class="status-msg"><div class="big">🤔</div><p>No recipes found. Try a different search term.</p></div>`;
     list.innerHTML = '';
     return;
   }
 
   status.innerHTML = '';
-  const allergyKeys = STATE.selectedAllergies;
+  const allergyCount = STATE.selectedAllergies.filter(a => INTOLERANCE_MAP[a]).length;
 
   list.innerHTML = filtered.map((r, i) => {
-    const isSaved = STATE.savedRecipes.some(s => s.title === r.title);
-    const allergenStatus = r.allergen_status || {};
-    const myContains = allergyKeys.filter(a => (allergenStatus.contains || []).includes(a));
-    const myMayContain = allergyKeys.filter(a => (allergenStatus.may_contain || []).includes(a));
-    const myFreeFrom = allergyKeys.filter(a => (allergenStatus.free_from || []).includes(a));
-
-    let safeTagsHtml = '';
-    if (allergyKeys.length === 0) {
-      safeTagsHtml = '<span class="safe-tag tag-safe">Set allergies to check safety</span>';
-    } else {
-      if (myContains.length > 0) safeTagsHtml += myContains.map(a => `<span class="safe-tag tag-contains">🚫 ${a}</span>`).join('');
-      if (myMayContain.length > 0) safeTagsHtml += myMayContain.map(a => `<span class="safe-tag tag-warn">⚠️ ${a}</span>`).join('');
-      if (myFreeFrom.length > 0 && myContains.length === 0 && myMayContain.length === 0) {
-        safeTagsHtml = '<span class="safe-tag tag-safe">✓ Safe for your allergies</span>';
-      } else if (myFreeFrom.length > 0) {
-        safeTagsHtml += `<span class="safe-tag tag-safe">✓ ${myFreeFrom.length} free</span>`;
-      }
-    }
+    const isSaved = STATE.savedRecipes.some(s => s.id === r.id);
+    const imgHtml = r.image
+      ? `<img class="recipe-img" src="${r.image}" alt="${r.title}" loading="lazy" onerror="this.outerHTML='<div class=\\'recipe-img-placeholder\\'>🍳</div>'">`
+      : `<div class="recipe-img-placeholder">🍳</div>`;
+    const difficulty = !r.readyInMinutes ? 'Easy' : r.readyInMinutes <= 20 ? 'Easy' : r.readyInMinutes <= 45 ? 'Medium' : 'Advanced';
+    const allergyBadge = allergyCount > 0 ? `<span class="safe-tag tag-safe">✓ Filtered for ${allergyCount} allergen${allergyCount > 1 ? 's' : ''}</span>` : '';
+    const dietTags = (r.diets || []).slice(0, 2).map(d => `<span class="safe-tag tag-safe">${d}</span>`).join('');
 
     return `
     <div class="recipe-card" onclick="toggleDesc(${i})">
       <div class="recipe-card-top">
-        <div class="recipe-emoji">${r.emoji || '🍳'}</div>
+        ${imgHtml}
         <div class="recipe-info">
           <div class="recipe-title">${r.title}</div>
           <div class="recipe-source">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            ${r.source || 'Recipe site'}
+            ${r.sourceName || 'Recipe site'}
           </div>
           <div class="recipe-meta">
-            <span>⏱ ${r.time || '—'}</span>
+            <span>⏱ ${r.readyInMinutes ? r.readyInMinutes + ' mins' : '—'}</span>
             <span>👥 ${r.servings || '—'}</span>
-            <span>⭐ ${r.difficulty || 'Easy'}</span>
+            <span>⭐ ${difficulty}</span>
           </div>
-          <div class="safe-tags">${safeTagsHtml}</div>
+          <div class="safe-tags">${allergyBadge}${dietTags}</div>
         </div>
         <button class="bookmark-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave(${i})" id="bm-${i}" aria-label="Save recipe">
           <svg viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
@@ -899,8 +931,7 @@ function renderResults(recipes) {
         </button>
       </div>
       <div class="recipe-desc" id="desc-${i}">
-        <p>${r.description || ''}</p>
-        <a class="open-link" href="${r.url || '#'}" target="_blank" rel="noopener">
+        <a class="open-link" href="${r.sourceUrl || '#'}" target="_blank" rel="noopener">
           Open full recipe
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
@@ -918,17 +949,12 @@ function toggleDesc(i) {
 function toggleSave(i) {
   const recipe = STATE.currentResults[i];
   if (!recipe) return;
-
-  const existingIdx = STATE.savedRecipes.findIndex(s => s.title === recipe.title);
-  if (existingIdx >= 0) {
-    STATE.savedRecipes.splice(existingIdx, 1);
-  } else {
-    STATE.savedRecipes.push({ ...recipe, savedAt: Date.now() });
-  }
+  const existingIdx = STATE.savedRecipes.findIndex(s => s.id === recipe.id);
+  if (existingIdx >= 0) STATE.savedRecipes.splice(existingIdx, 1);
+  else STATE.savedRecipes.push({ ...recipe, savedAt: Date.now() });
   localStorage.setItem('kc_saved', JSON.stringify(STATE.savedRecipes));
-
+  const isSaved = STATE.savedRecipes.some(s => s.id === recipe.id);
   const btn = document.getElementById('bm-' + i);
-  const isSaved = STATE.savedRecipes.some(s => s.title === recipe.title);
   if (btn) {
     btn.classList.toggle('saved', isSaved);
     btn.querySelector('svg').setAttribute('fill', isSaved ? 'currentColor' : 'none');
@@ -943,7 +969,7 @@ function updateSavedCount() {
 function renderSaved() {
   const list = document.getElementById('savedList');
   const empty = document.getElementById('savedEmpty');
-  const allergyKeys = STATE.selectedAllergies;
+  const allergyCount = STATE.selectedAllergies.filter(a => INTOLERANCE_MAP[a]).length;
 
   if (STATE.savedRecipes.length === 0) {
     list.innerHTML = '';
@@ -953,38 +979,27 @@ function renderSaved() {
   empty.style.display = 'none';
 
   list.innerHTML = STATE.savedRecipes.map((r, i) => {
-    const allergenStatus = r.allergen_status || {};
-    const myContains = allergyKeys.filter(a => (allergenStatus.contains || []).includes(a));
-    const myMayContain = allergyKeys.filter(a => (allergenStatus.may_contain || []).includes(a));
-    const myFreeFrom = allergyKeys.filter(a => (allergenStatus.free_from || []).includes(a));
-
-    let safeTagsHtml = '';
-    if (allergyKeys.length === 0) {
-      safeTagsHtml = '';
-    } else {
-      if (myContains.length > 0) safeTagsHtml += myContains.map(a => `<span class="safe-tag tag-contains">🚫 ${a}</span>`).join('');
-      if (myMayContain.length > 0) safeTagsHtml += myMayContain.map(a => `<span class="safe-tag tag-warn">⚠️ ${a}</span>`).join('');
-      if (myFreeFrom.length > 0 && myContains.length === 0 && myMayContain.length === 0) {
-        safeTagsHtml = '<span class="safe-tag tag-safe">✓ Safe for your allergies</span>';
-      }
-    }
+    const imgHtml = r.image
+      ? `<img class="recipe-img" src="${r.image}" alt="${r.title}" loading="lazy" onerror="this.outerHTML='<div class=\\'recipe-img-placeholder\\'>🍳</div>'">`
+      : `<div class="recipe-img-placeholder">🍳</div>`;
+    const allergyBadge = allergyCount > 0 ? `<span class="safe-tag tag-safe">✓ Filtered for ${allergyCount} allergen${allergyCount > 1 ? 's' : ''}</span>` : '';
+    const dietTags = (r.diets || []).slice(0, 2).map(d => `<span class="safe-tag tag-safe">${d}</span>`).join('');
 
     return `
     <div class="recipe-card">
       <div class="recipe-card-top">
-        <div class="recipe-emoji">${r.emoji || '🍳'}</div>
+        ${imgHtml}
         <div class="recipe-info">
           <div class="recipe-title">${r.title}</div>
           <div class="recipe-source">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            ${r.source || 'Recipe site'}
+            ${r.sourceName || 'Recipe site'}
           </div>
           <div class="recipe-meta">
-            <span>⏱ ${r.time || '—'}</span>
+            <span>⏱ ${r.readyInMinutes ? r.readyInMinutes + ' mins' : '—'}</span>
             <span>👥 ${r.servings || '—'}</span>
-            <span>⭐ ${r.difficulty || 'Easy'}</span>
           </div>
-          ${safeTagsHtml ? `<div class="safe-tags">${safeTagsHtml}</div>` : ''}
+          ${allergyBadge || dietTags ? `<div class="safe-tags">${allergyBadge}${dietTags}</div>` : ''}
         </div>
         <button class="bookmark-btn saved" onclick="removeSaved(${i})" aria-label="Remove saved recipe">
           <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
@@ -993,8 +1008,7 @@ function renderSaved() {
         </button>
       </div>
       <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
-        <p style="font-size:13px;color:var(--text2);line-height:1.5;">${r.description || ''}</p>
-        <a class="open-link" href="${r.url || '#'}" target="_blank" rel="noopener">
+        <a class="open-link" href="${r.sourceUrl || '#'}" target="_blank" rel="noopener">
           Open full recipe
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
