@@ -692,10 +692,11 @@ const ALLERGENS = [
   { id: 'sesame',    emoji: '🌻', name: 'Sesame' },
 ];
 const PREFS = [
-  { id: 'vegan',      emoji: '🥦', name: 'Vegan' },
-  { id: 'vegetarian', emoji: '🥗', name: 'Vegetarian' },
-  { id: 'lowsugar',   emoji: '🍬', name: 'Low Sugar' },
-  { id: 'lowsodium',  emoji: '🧂', name: 'Low Sodium' },
+  { id: 'kidfriendly', emoji: '👶', name: 'Kid Friendly' },
+  { id: 'vegan',       emoji: '🥦', name: 'Vegan' },
+  { id: 'vegetarian',  emoji: '🥗', name: 'Vegetarian' },
+  { id: 'lowsugar',    emoji: '🍬', name: 'Low Sugar' },
+  { id: 'lowsodium',   emoji: '🧂', name: 'Low Sodium' },
 ];
 
 const INTOLERANCE_MAP = {
@@ -856,6 +857,7 @@ async function doSearch() {
   });
   if (intolerances.length) params.set('intolerances', intolerances.join(','));
   if (diets.length) params.set('diet', diets.join(','));
+  if (STATE.selectedAllergies.includes('kidfriendly')) params.set('tags', 'kid-friendly');
   if (STATE.activeFilter !== 'all') params.set('type', MEAL_TYPE_MAP[STATE.activeFilter] || STATE.activeFilter);
 
   try {
