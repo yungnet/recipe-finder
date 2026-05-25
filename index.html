@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KidChef">
+<meta name="theme-color" content="#fff8f0">
+<link rel="manifest" href="manifest.json">
+<title>KidChef — Allergy-Safe Recipes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff8f0;
+    --surface: #ffffff;
+    --surface2: #fef3e8;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.15);
+    --text: #1a1208;
+    --text2: #6b5b3e;
+    --text3: #a8936e;
+    --orange: #f97316;
+    --orange-light: #fed7aa;
+    --orange-bg: #fff7ed;
+    --green: #22c55e;
+    --green-light: #bbf7d0;
+    --green-bg: #f0fdf4;
+    --red: #ef4444;
+    --red-light: #fecaca;
+    --red-bg: #fef2f2;
+    --teal: #0d9488;
+    --teal-light: #99f6e4;
+    --yellow: #eab308;
+    --yellow-light: #fef08a;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+  }
+
+  /* === HEADER === */
+  .header {
+    padding: 48px 20px 20px;
+    background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--text);
+  }
+  .logo span { color: var(--orange); }
+  .header-tagline {
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .settings-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+  .settings-btn:hover { background: var(--surface2); }
+  .settings-btn svg { width: 16px; height: 16px; }
+
+  /* === ALLERGY CHIPS (header summary) === */
+  .allergy-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .allergy-chip {
+    background: var(--red-bg);
+    border: 1px solid var(--red-light);
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .allergy-chip-none {
+    background: var(--green-bg);
+    border: 1px solid var(--green-light);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+  }
+
+  /* === TABS === */
+  .tab-bar {
+    display: flex;
+    padding: 12px 20px 0;
+    gap: 4px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+
+  /* === SEARCH === */
+  .search-section {
+    padding: 16px 20px 12px;
+  }
+  .search-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .search-input-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-input-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 12px 12px 12px 38px;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--orange); }
+  .search-input::placeholder { color: var(--text3); font-weight: 400; }
+  .search-btn {
+    background: var(--orange);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { opacity: 0.9; }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .filter-pill.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+
+  /* === RECIPE CARDS === */
+  .section-label {
+    padding: 14px 20px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .recipe-list { padding: 0 20px; }
+
+  .recipe-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .recipe-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+  .recipe-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .recipe-emoji {
+    font-size: 36px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .recipe-info { flex: 1; min-width: 0; }
+  .recipe-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .recipe-source {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .recipe-source svg { width: 12px; height: 12px; }
+  .recipe-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .recipe-meta span { display: flex; align-items: center; gap: 3px; }
+  .recipe-meta svg { width: 12px; height: 12px; }
+
+  .safe-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .safe-tag {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+  .tag-safe { background: var(--green-bg); color: var(--green); }
+  .tag-warn { background: var(--yellow-light); color: #713f12; }
+  .tag-contains { background: var(--red-bg); color: var(--red); }
+
+  .bookmark-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--text3);
+    flex-shrink: 0;
+    transition: color 0.15s, transform 0.1s;
+  }
+  .bookmark-btn:hover { color: var(--orange); }
+  .bookmark-btn.saved { color: var(--orange); }
+  .bookmark-btn svg { width: 22px; height: 22px; }
+  .bookmark-btn:active { transform: scale(1.2); }
+
+  .recipe-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .recipe-desc.open { display: block; }
+  .open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+    text-decoration: none;
+  }
+  .open-link svg { width: 12px; height: 12px; }
+
+  /* === LOADING / EMPTY === */
+  .status-msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+  .status-msg .big { font-size: 40px; margin-bottom: 12px; }
+  .status-msg p { font-size: 14px; font-weight: 600; line-height: 1.5; }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--orange-light);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 30px auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* === ALLERGY SETTINGS PANEL === */
+  .panel-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+  }
+  .panel-overlay.open { display: flex; }
+  .panel {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .panel-handle {
+    width: 40px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .panel-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .panel-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .allergy-group-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin: 16px 0 10px;
+  }
+  .allergy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .allergy-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: var(--surface);
+    transition: all 0.15s;
+  }
+  .allergy-toggle.selected {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+  .allergy-toggle .emoji { font-size: 20px; }
+  .allergy-toggle .name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .allergy-toggle.selected .name { color: var(--red); }
+  .allergy-toggle .checkmark {
+    margin-left: auto;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .allergy-toggle.selected .checkmark {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .allergy-toggle.selected .checkmark::after {
+    content: '';
+    width: 8px; height: 4px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+
+  .severity-row {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .severity-label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .severity-opts {
+    display: flex;
+    gap: 8px;
+  }
+  .severity-opt {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .severity-opt.active-avoid { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .severity-opt.active-warn  { border-color: var(--yellow); background: var(--yellow-light); color: #713f12; }
+
+  .save-btn {
+    width: 100%;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.15s;
+  }
+  .save-btn:hover { opacity: 0.9; }
+
+  /* === SAVED RECIPES TAB === */
+  .saved-empty {
+    text-align: center;
+    padding: 50px 30px;
+  }
+  .saved-empty .big { font-size: 50px; margin-bottom: 12px; }
+  .saved-empty p { font-size: 14px; color: var(--text3); font-weight: 600; line-height: 1.5; }
+
+  /* === NAV BAR === */
+  .nav-bar {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255,255,255,0.95);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 20px;
+    backdrop-filter: blur(10px);
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: color 0.15s;
+  }
+  .nav-item.active { color: var(--orange); }
+  .nav-item svg { width: 22px; height: 22px; }
+
+  /* === CONTENT SECTIONS === */
+  .section { display: none; }
+  .section.active { display: block; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <div>
+      <div class="logo">Kid<span>Chef</span> 🍳</div>
+      <div class="header-tagline">Allergy-safe recipes for little ones</div>
+    </div>
+    <button class="settings-btn" onclick="openPanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      Allergies
+    </button>
+  </div>
+  <div class="allergy-summary" id="allergySummary"></div>
+</header>
+
+<div class="tab-bar" id="tabBar">
+  <div class="tab active" onclick="showTab('search')">🔍 Search</div>
+  <div class="tab" onclick="showTab('saved')">🔖 Saved (<span id="savedCount">0</span>)</div>
+</div>
+
+<!-- SEARCH TAB -->
+<div class="section active" id="tab-search">
+  <div class="search-section">
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search recipes (e.g. pasta, cookies)..." />
+      </div>
+      <button class="search-btn" id="searchBtn" onclick="doSearch()">Find</button>
+    </div>
+    <div class="filter-row" id="filterRow">
+      <div class="filter-pill active" data-filter="all" onclick="setFilter(this,'all')">All</div>
+      <div class="filter-pill" data-filter="breakfast" onclick="setFilter(this,'breakfast')">🌅 Breakfast</div>
+      <div class="filter-pill" data-filter="lunch" onclick="setFilter(this,'lunch')">🥪 Lunch</div>
+      <div class="filter-pill" data-filter="dinner" onclick="setFilter(this,'dinner')">🍽 Dinner</div>
+      <div class="filter-pill" data-filter="snack" onclick="setFilter(this,'snack')">🍎 Snack</div>
+      <div class="filter-pill" data-filter="dessert" onclick="setFilter(this,'dessert')">🍰 Dessert</div>
+    </div>
+  </div>
+
+  <div id="searchStatus">
+    <div class="status-msg">
+      <div class="big">🥕</div>
+      <p>Search above to find allergy-safe recipes for your kids.<br>We'll check every result against your allergy preferences!</p>
+    </div>
+  </div>
+  <div class="recipe-list" id="recipeList"></div>
+</div>
+
+<!-- SAVED TAB -->
+<div class="section" id="tab-saved">
+  <div class="section-label">Pinned Recipes</div>
+  <div class="recipe-list" id="savedList"></div>
+  <div class="saved-empty" id="savedEmpty" style="display:none">
+    <div class="big">🔖</div>
+    <p>No saved recipes yet.<br>Tap the bookmark icon on any recipe to pin it here!</p>
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<div class="nav-bar">
+  <div class="nav-item active" id="nav-search" onclick="showTab('search')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Search
+  </div>
+  <div class="nav-item" id="nav-saved" onclick="showTab('saved')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    Saved
+  </div>
+</div>
+
+<!-- ALLERGY PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel(event)">
+  <div class="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">Allergy Preferences 🚨</div>
+    <div class="panel-subtitle">Select all allergens to avoid. Recipes will be checked against these and flagged accordingly.</div>
+
+    <div class="severity-row">
+      <div class="severity-label">Flag severity level</div>
+      <div class="severity-opts">
+        <div class="severity-opt active-avoid" id="sev-strict" onclick="setSeverity('strict')">🚫 Strict — Avoid all</div>
+        <div class="severity-opt" id="sev-warn" onclick="setSeverity('warn')">⚠️ Warn only</div>
+      </div>
+    </div>
+
+    <div class="allergy-group-label">Common Allergens (Big 9)</div>
+    <div class="allergy-grid" id="allergyGrid"></div>
+
+    <div class="allergy-group-label">Other Preferences</div>
+    <div class="allergy-grid" id="prefGrid"></div>
+
+    <button class="save-btn" onclick="saveAllergies()">Save & Close ✓</button>
+  </div>
+</div>
+
+<script>
+const ALLERGENS = [
+  { id: 'peanuts',     emoji: '🥜', name: 'Peanuts' },
+  { id: 'treenuts',   emoji: '🌰', name: 'Tree Nuts' },
+  { id: 'milk',       emoji: '🥛', name: 'Milk/Dairy' },
+  { id: 'eggs',       emoji: '🥚', name: 'Eggs' },
+  { id: 'wheat',      emoji: '🌾', name: 'Wheat/Gluten' },
+  { id: 'soy',        emoji: '🫘', name: 'Soy' },
+  { id: 'fish',       emoji: '🐟', name: 'Fish' },
+  { id: 'shellfish',  emoji: '🦐', name: 'Shellfish' },
+  { id: 'sesame',     emoji: '🌻', name: 'Sesame' },
+];
+const PREFS = [
+  { id: 'vegan',      emoji: '🥦', name: 'Vegan' },
+  { id: 'vegetarian', emoji: '🥗', name: 'Vegetarian' },
+  { id: 'lowsugar',   emoji: '🍬', name: 'Low Sugar' },
+  { id: 'lowsodium',  emoji: '🧂', name: 'Low Sodium' },
+];
+
+let STATE = {
+  selectedAllergies: JSON.parse(localStorage.getItem('kc_allergies') || '[]'),
+  severity: localStorage.getItem('kc_severity') || 'strict',
+  savedRecipes: JSON.parse(localStorage.getItem('kc_saved') || '[]'),
+  currentResults: [],
+  activeFilter: 'all',
+  activeTab: 'search',
+};
+
+// ===== INIT =====
+function init() {
+  renderAllergyPanel();
+  renderAllergySummary();
+  renderSaved();
+  updateSavedCount();
+
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+}
+
+// ===== TABS =====
+function showTab(tab) {
+  STATE.activeTab = tab;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  if (tab === 'search') { tabs[0].classList.add('active'); document.getElementById('nav-search').classList.add('active'); }
+  if (tab === 'saved')  { tabs[1].classList.add('active'); document.getElementById('nav-saved').classList.add('active'); }
+  if (tab === 'saved') renderSaved();
+}
+
+// ===== ALLERGY PANEL =====
+function renderAllergyPanel() {
+  const grid = document.getElementById('allergyGrid');
+  grid.innerHTML = ALLERGENS.map(a => `
+    <div class="allergy-toggle ${STATE.selectedAllergies.includes(a.id) ? 'selected' : ''}" id="at-${a.id}" onclick="toggleAllergy('${a.id}')">
+      <span class="emoji">${a.emoji}</span>
+      <span class="name">${a.name}</span>
+      <div class="checkmark"></div>
+    </div>
+  `).join('');
+
+  const pgrid = document.getElementById('prefGrid');
+  pgrid.innerHTML = PREFS.map(a => `
+    <div class="allergy-toggle ${STATE.selectedAllergies.includes(a.id) ? 'selected' : ''}" id="at-${a.id}" onclick="toggleAllergy('${a.id}')">
+      <span class="emoji">${a.emoji}</span>
+      <span class="name">${a.name}</span>
+      <div class="checkmark"></div>
+    </div>
+  `).join('');
+
+  setSeverity(STATE.severity, false);
+}
+
+function toggleAllergy(id) {
+  const idx = STATE.selectedAllergies.indexOf(id);
+  if (idx >= 0) STATE.selectedAllergies.splice(idx, 1);
+  else STATE.selectedAllergies.push(id);
+  const el = document.getElementById('at-' + id);
+  el.classList.toggle('selected');
+}
+
+function setSeverity(val, save = true) {
+  STATE.severity = val;
+  document.getElementById('sev-strict').className = 'severity-opt' + (val === 'strict' ? ' active-avoid' : '');
+  document.getElementById('sev-warn').className   = 'severity-opt' + (val === 'warn'   ? ' active-warn'  : '');
+}
+
+function saveAllergies() {
+  localStorage.setItem('kc_allergies', JSON.stringify(STATE.selectedAllergies));
+  localStorage.setItem('kc_severity', STATE.severity);
+  renderAllergySummary();
+  closePanel();
+}
+
+function renderAllergySummary() {
+  const el = document.getElementById('allergySummary');
+  if (STATE.selectedAllergies.length === 0) {
+    el.innerHTML = '<div class="allergy-chip-none">✓ No allergens set</div>';
+    return;
+  }
+  const all = [...ALLERGENS, ...PREFS];
+  el.innerHTML = STATE.selectedAllergies.map(id => {
+    const a = all.find(x => x.id === id);
+    return a ? `<div class="allergy-chip">${a.emoji} ${a.name}</div>` : '';
+  }).join('');
+}
+
+function openPanel() {
+  renderAllergyPanel();
+  document.getElementById('panelOverlay').classList.add('open');
+}
+function closePanel(e) {
+  if (!e || e.target === document.getElementById('panelOverlay'))
+    document.getElementById('panelOverlay').classList.remove('open');
+}
+
+// ===== FILTER PILLS =====
+function setFilter(el, val) {
+  STATE.activeFilter = val;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderResults(STATE.currentResults);
+}
+
+// ===== SEARCH =====
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  document.getElementById('searchStatus').innerHTML = `<div class="spinner"></div><div class="status-msg"><p>Searching for allergy-safe recipes...</p></div>`;
+  document.getElementById('recipeList').innerHTML = '';
+
+  const allergyContext = STATE.selectedAllergies.length > 0
+    ? `The user wants to avoid these allergens: ${STATE.selectedAllergies.join(', ')}. For each recipe, explicitly state whether it contains, may contain, or is free from each of these allergens.`
+    : 'No allergens specified.';
+
+  const mealFilter = STATE.activeFilter !== 'all' ? ` as a ${STATE.activeFilter}` : '';
+  const prompt = `Find 6 child-friendly recipes for "${q}"${mealFilter}.
+
+${allergyContext}
+
+Return a JSON array (no markdown, no extra text) with exactly this shape:
+[
+  {
+    "title": "Recipe Name",
+    "emoji": "🍕",
+    "description": "2-sentence kid-friendly description",
+    "time": "25 mins",
+    "servings": "4",
+    "difficulty": "Easy",
+    "meal_type": "dinner",
+    "url": "https://www.example.com/recipe",
+    "source": "Source website name",
+    "allergen_status": {
+      "contains": ["milk","eggs"],
+      "may_contain": ["wheat"],
+      "free_from": ["peanuts","soy","fish","shellfish","sesame","treenuts"]
+    }
+  }
+]
+
+Use real recipe websites like BBC Good Food, Allrecipes, Food Network, Serious Eats, or similar. Make the URLs plausible and real-looking. Only return valid JSON.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    const recipes = JSON.parse(cleaned);
+    STATE.currentResults = recipes;
+    renderResults(recipes);
+  } catch (err) {
+    document.getElementById('searchStatus').innerHTML = `<div class="status-msg"><div class="big">😕</div><p>Something went wrong searching. Please try again.</p></div>`;
+    document.getElementById('recipeList').innerHTML = '';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Find';
+}
+
+function renderResults(recipes) {
+  const list = document.getElementById('recipeList');
+  const status = document.getElementById('searchStatus');
+
+  let filtered = recipes;
+  if (STATE.activeFilter !== 'all') {
+    filtered = recipes.filter(r => (r.meal_type || '').toLowerCase() === STATE.activeFilter);
+  }
+
+  if (filtered.length === 0) {
+    status.innerHTML = `<div class="status-msg"><div class="big">🤔</div><p>No ${STATE.activeFilter} recipes found. Try a different filter or search term.</p></div>`;
+    list.innerHTML = '';
+    return;
+  }
+
+  status.innerHTML = '';
+  const allergyKeys = STATE.selectedAllergies;
+
+  list.innerHTML = filtered.map((r, i) => {
+    const isSaved = STATE.savedRecipes.some(s => s.title === r.title);
+    const allergenStatus = r.allergen_status || {};
+    const myContains = allergyKeys.filter(a => (allergenStatus.contains || []).includes(a));
+    const myMayContain = allergyKeys.filter(a => (allergenStatus.may_contain || []).includes(a));
+    const myFreeFrom = allergyKeys.filter(a => (allergenStatus.free_from || []).includes(a));
+
+    let safeTagsHtml = '';
+    if (allergyKeys.length === 0) {
+      safeTagsHtml = '<span class="safe-tag tag-safe">Set allergies to check safety</span>';
+    } else {
+      if (myContains.length > 0) safeTagsHtml += myContains.map(a => `<span class="safe-tag tag-contains">🚫 ${a}</span>`).join('');
+      if (myMayContain.length > 0) safeTagsHtml += myMayContain.map(a => `<span class="safe-tag tag-warn">⚠️ ${a}</span>`).join('');
+      if (myFreeFrom.length > 0 && myContains.length === 0 && myMayContain.length === 0) {
+        safeTagsHtml = '<span class="safe-tag tag-safe">✓ Safe for your allergies</span>';
+      } else if (myFreeFrom.length > 0) {
+        safeTagsHtml += `<span class="safe-tag tag-safe">✓ ${myFreeFrom.length} free</span>`;
+      }
+    }
+
+    return `
+    <div class="recipe-card" onclick="toggleDesc(${i})">
+      <div class="recipe-card-top">
+        <div class="recipe-emoji">${r.emoji || '🍳'}</div>
+        <div class="recipe-info">
+          <div class="recipe-title">${r.title}</div>
+          <div class="recipe-source">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            ${r.source || 'Recipe site'}
+          </div>
+          <div class="recipe-meta">
+            <span>⏱ ${r.time || '—'}</span>
+            <span>👥 ${r.servings || '—'}</span>
+            <span>⭐ ${r.difficulty || 'Easy'}</span>
+          </div>
+          <div class="safe-tags">${safeTagsHtml}</div>
+        </div>
+        <button class="bookmark-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave(${i})" id="bm-${i}" aria-label="Save recipe">
+          <svg viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="recipe-desc" id="desc-${i}">
+        <p>${r.description || ''}</p>
+        <a class="open-link" href="${r.url || '#'}" target="_blank" rel="noopener">
+          Open full recipe
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDesc(i) {
+  const desc = document.getElementById('desc-' + i);
+  if (desc) desc.classList.toggle('open');
+}
+
+// ===== SAVE / BOOKMARK =====
+function toggleSave(i) {
+  const recipe = STATE.currentResults[i];
+  if (!recipe) return;
+
+  const existingIdx = STATE.savedRecipes.findIndex(s => s.title === recipe.title);
+  if (existingIdx >= 0) {
+    STATE.savedRecipes.splice(existingIdx, 1);
+  } else {
+    STATE.savedRecipes.push({ ...recipe, savedAt: Date.now() });
+  }
+  localStorage.setItem('kc_saved', JSON.stringify(STATE.savedRecipes));
+
+  const btn = document.getElementById('bm-' + i);
+  const isSaved = STATE.savedRecipes.some(s => s.title === recipe.title);
+  if (btn) {
+    btn.classList.toggle('saved', isSaved);
+    btn.querySelector('svg').setAttribute('fill', isSaved ? 'currentColor' : 'none');
+  }
+  updateSavedCount();
+}
+
+function updateSavedCount() {
+  document.getElementById('savedCount').textContent = STATE.savedRecipes.length;
+}
+
+function renderSaved() {
+  const list = document.getElementById('savedList');
+  const empty = document.getElementById('savedEmpty');
+  const allergyKeys = STATE.selectedAllergies;
+
+  if (STATE.savedRecipes.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = STATE.savedRecipes.map((r, i) => {
+    const allergenStatus = r.allergen_status || {};
+    const myContains = allergyKeys.filter(a => (allergenStatus.contains || []).includes(a));
+    const myMayContain = allergyKeys.filter(a => (allergenStatus.may_contain || []).includes(a));
+    const myFreeFrom = allergyKeys.filter(a => (allergenStatus.free_from || []).includes(a));
+
+    let safeTagsHtml = '';
+    if (allergyKeys.length === 0) {
+      safeTagsHtml = '';
+    } else {
+      if (myContains.length > 0) safeTagsHtml += myContains.map(a => `<span class="safe-tag tag-contains">🚫 ${a}</span>`).join('');
+      if (myMayContain.length > 0) safeTagsHtml += myMayContain.map(a => `<span class="safe-tag tag-warn">⚠️ ${a}</span>`).join('');
+      if (myFreeFrom.length > 0 && myContains.length === 0 && myMayContain.length === 0) {
+        safeTagsHtml = '<span class="safe-tag tag-safe">✓ Safe for your allergies</span>';
+      }
+    }
+
+    return `
+    <div class="recipe-card">
+      <div class="recipe-card-top">
+        <div class="recipe-emoji">${r.emoji || '🍳'}</div>
+        <div class="recipe-info">
+          <div class="recipe-title">${r.title}</div>
+          <div class="recipe-source">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            ${r.source || 'Recipe site'}
+          </div>
+          <div class="recipe-meta">
+            <span>⏱ ${r.time || '—'}</span>
+            <span>👥 ${r.servings || '—'}</span>
+            <span>⭐ ${r.difficulty || 'Easy'}</span>
+          </div>
+          ${safeTagsHtml ? `<div class="safe-tags">${safeTagsHtml}</div>` : ''}
+        </div>
+        <button class="bookmark-btn saved" onclick="removeSaved(${i})" aria-label="Remove saved recipe">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+      </div>
+      <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+        <p style="font-size:13px;color:var(--text2);line-height:1.5;">${r.description || ''}</p>
+        <a class="open-link" href="${r.url || '#'}" target="_blank" rel="noopener">
+          Open full recipe
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeSaved(i) {
+  STATE.savedRecipes.splice(i, 1);
+  localStorage.setItem('kc_saved', JSON.stringify(STATE.savedRecipes));
+  updateSavedCount();
+  renderSaved();
+}
+
+init();
+</script>
+</body>
+</html>
